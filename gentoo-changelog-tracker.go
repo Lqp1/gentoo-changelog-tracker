@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+	"time"
 )
 
 func lookupAtom(search string) string {
@@ -59,9 +60,11 @@ func extractContent(src string) string {
 func formatEntry(entry *gofeed.Item, index int, length int) string {
 	green := color.New(color.FgGreen).SprintFunc()
 	red := color.New(color.FgRed).SprintFunc()
+	blue := color.New(color.FgBlue).SprintFunc()
 	header := fmt.Sprintf("[%d/%d]", index, length)
-	return fmt.Sprintf("%s %s\n%s-----",
-		red(header), green(entry.Title), extractContent(entry.Content))
+	time, _ := time.Parse(time.RFC3339, entry.Published)
+	return fmt.Sprintf("%s %s on %s\n%s-----",
+		red(header), green(entry.Title), blue(time), extractContent(entry.Content))
 }
 
 func main() {
