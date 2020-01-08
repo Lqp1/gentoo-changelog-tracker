@@ -13,7 +13,7 @@ import (
 )
 
 func lookupAtom(search string) string {
-	atom_reg := regexp.MustCompile(`^(.*/.*?)-.*`)
+	atom_reg := regexp.MustCompile(`^([a-z\-]*/[a-z\-0-9]*)-.*`)
 	cmd := exec.Command("equery", "-qC", "list", search)
 	out, err := cmd.Output()
 	if err != nil {
