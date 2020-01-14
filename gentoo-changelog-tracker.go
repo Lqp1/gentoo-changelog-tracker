@@ -1,12 +1,14 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/mmcdole/gofeed"
 	"golang.org/x/net/html"
 	"log"
+	"net/http"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -67,8 +69,47 @@ func formatEntry(entry *gofeed.Item, index int, length int) string {
 		red(header), green(entry.Title), blue(time), extractContent(entry.Content))
 }
 
+func formatDiff(commitID string) string {
+	blue := color.New(color.FgBlue).SprintFunc()
+	green := color.New(color.FgGreen).SprintFunc()
+	red := color.New(color.FgRed).SprintFunc()
+	var out string
+	var inHeader bool = true
+	uri := fmt.Sprintf("https://gitweb.gentoo.org/repo/gentoo.git/patch/?id=%s", commitID)
+	diff, err := http.Get(uri)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer diff.Body.Close()
+	rd := bufio.NewReader(diff.Body)
+	for {
+		str, err := rd.ReadString('\n')
+		if err != nil {
+			break
+		}
+		if strings.HasPrefix(str, "---") {
+			inHeader = false
+		}
+		if inHeader == true {
+			out += blue(str)
+		} else {
+			if strings.HasPrefix(str, "+++") || strings.HasPrefix(str, "---") || strings.HasPrefix(str, "@@") {
+				out += blue(str)
+			} else if strings.HasPrefix(str, "+") {
+				out += green(str)
+			} else if strings.HasPrefix(str, "-") {
+				out += red(str)
+			} else {
+				out += str
+			}
+		}
+	}
+	return out
+}
+
 func main() {
 	limit := flag.Int("limit", 10, "How many entries to fetch")
+	full := flag.Bool("full", false, "Print patch instead of commit summary")
 	flag.Parse()
 
 	if len(flag.Args()) != 1 {
@@ -94,7 +135,11 @@ func main() {
 		fmt.Println("No entry to print")
 	} else {
 		for i := 0; i < *limit; i++ {
-			fmt.Println(formatEntry(feed.Items[i], i+1, *limit))
+			if !*full {
+				fmt.Println(formatEntry(feed.Items[i], i+1, *limit))
+			} else {
+				fmt.Println(formatDiff(feed.Items[i].GUID))
+			}
 		}
 	}
 
