@@ -8,7 +8,7 @@ feed thus it's limited to 10 entries).
 Usage examples:
 
 ```
-go get -d ./... && go build
+go build
 ./gentoo-changelog-tracker --limit 5 vim
 ./gentoo-changelog-tracker --limit 1 --full emacs
 ```
