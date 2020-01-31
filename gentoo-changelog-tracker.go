@@ -16,11 +16,14 @@ import (
 )
 
 func lookupAtom(search string) string {
-	atom_reg := regexp.MustCompile(`^([a-z\-0-9]*/[a-z\-0-9]*)-.*`)
+	atom_reg := regexp.MustCompile(`^([a-zA-Z_\-0-9]*/[a-zA-Z_\-0-9]*)-.*`)
+	// TODO : Using equery is rather simple but we can't find packages that are not installed...
+	//        Better use emerge something like that :
+	// emerge --quiet --fuzzy-search n --search "%^ATOM$"
 	cmd := exec.Command("equery", "-qC", "list", search)
 	out, err := cmd.Output()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Atom not found on system; equery output: ", err)
 	}
 	atom := atom_reg.FindStringSubmatch(string(out))
 	if len(atom) <= 1 {
@@ -78,7 +81,7 @@ func formatDiff(commitID string) string {
 	uri := fmt.Sprintf("https://gitweb.gentoo.org/repo/gentoo.git/patch/?id=%s", commitID)
 	diff, err := http.Get(uri)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error while getting commit info from gitweb: ", err)
 	}
 	defer diff.Body.Close()
 	rd := bufio.NewReader(diff.Body)
@@ -125,7 +128,7 @@ func main() {
 	uri := fmt.Sprintf("https://gitweb.gentoo.org/repo/gentoo.git/atom/%s?h=master", atom)
 	feed, err := fp.ParseURL(uri)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error while getting log info from gitweb: ", err)
 	}
 	if len(feed.Items) < *limit {
 		*limit = len(feed.Items)
