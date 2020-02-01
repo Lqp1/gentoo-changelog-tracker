@@ -85,7 +85,9 @@ func formatDiff(commitID string) string {
 	}
 	defer diff.Body.Close()
 	rd := bufio.NewReader(diff.Body)
-	for {
+	// Only print maximum of 100 lines to avoid huge commits being printed
+	// to stdout
+	for i := 0; i < 100; i++ {
 		str, err := rd.ReadString('\n')
 		if err != nil {
 			break
@@ -108,6 +110,16 @@ func formatDiff(commitID string) string {
 		}
 	}
 	return out
+}
+
+func fillCommit(queue chan struct {
+	int
+	string
+}, index int, commit string) {
+	queue <- struct {
+		int
+		string
+	}{index, formatDiff(commit)}
 }
 
 func main() {
@@ -137,12 +149,24 @@ func main() {
 	if *limit == 0 {
 		fmt.Println("No entry to print")
 	} else {
-		for i := 0; i < *limit; i++ {
-			if !*full {
+		if !*full {
+			for i := 0; i < *limit; i++ {
 				fmt.Println(formatEntry(feed.Items[i], i+1, *limit))
-			} else {
-				fmt.Println(formatDiff(feed.Items[i].GUID))
 			}
+		} else {
+			queue := make(chan struct {
+				int
+				string
+			})
+			output := make([]string, *limit)
+			for i := 0; i < *limit; i++ {
+				go fillCommit(queue, i, feed.Items[i].GUID)
+			}
+			for i := 0; i < *limit; i++ {
+				diff := <-queue
+				output[diff.int] = diff.string
+			}
+			fmt.Println(strings.Join(output, "\n"))
 		}
 	}
 
