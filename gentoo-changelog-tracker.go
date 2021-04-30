@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-func lookupAtom(search string) string {
+func lookupAtomEquery(search string) string {
 	atom_reg := regexp.MustCompile(`^([a-zA-Z_\-0-9]*/[a-zA-Z_\-0-9]*)-.*`)
 	// TODO : Using equery is rather simple but we can't find packages that are not installed...
 	//        Better use emerge something like that :
@@ -26,6 +26,24 @@ func lookupAtom(search string) string {
 		log.Fatal("Atom not found on system; equery output: ", err)
 	}
 	atom := atom_reg.FindStringSubmatch(string(out))
+	if len(atom) <= 1 {
+		log.Fatal("Could not match atom from equery output : " + string(out))
+	}
+	if len(atom) > 2 {
+		fmt.Printf("Found atoms : %v\n", atom[1:])
+		fmt.Println("Several atoms were found. First one will be used")
+	} else {
+		fmt.Printf("Found atom : %s\n", atom[1])
+	}
+	return atom[1]
+}
+func lookupAtomEix(search string) string {
+	cmd := exec.Command("eix", "-#n", search)
+	out, err := cmd.Output()
+	if err != nil {
+		log.Fatal("Atom not found on system; eix output: ", err)
+	}
+	atom := strings.Split(strings.TrimSuffix(string(out), "\n"), "\n")
 	if len(atom) <= 1 {
 		log.Fatal("Could not match atom from equery output : " + string(out))
 	}
@@ -134,7 +152,7 @@ func main() {
 		log.Fatal("Currently we cannot retrieve more than 10 entries")
 	}
 
-	atom := lookupAtom(flag.Args()[0])
+	atom := lookupAtomEix(flag.Args()[0])
 
 	fp := gofeed.NewParser()
 	uri := fmt.Sprintf("https://gitweb.gentoo.org/repo/gentoo.git/atom/%s?h=master", atom)

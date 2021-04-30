@@ -14,7 +14,7 @@ LICENSE="GPL-3"
 SLOT="0"
 IUSE=""
 
-DEPEND="app-portage/gentoolkit"
+DEPEND="app-portage/eix"
 RDEPEND="${DEPEND}"
 
 src_prepare() {
