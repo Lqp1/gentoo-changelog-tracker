@@ -44,16 +44,16 @@ func lookupAtomEix(search string) string {
 		log.Fatal("Atom not found on system; eix output: ", err)
 	}
 	atom := strings.Split(strings.TrimSuffix(string(out), "\n"), "\n")
-	if len(atom) <= 1 {
-		log.Fatal("Could not match atom from equery output : " + string(out))
+	if len(atom) == 0 {
+		log.Fatal("Could not match atom from eix output : " + string(out))
 	}
-	if len(atom) > 2 {
-		fmt.Printf("Found atoms : %v\n", atom[1:])
+	if len(atom) > 1 {
+		fmt.Printf("Found atoms : %v\n", atom)
 		fmt.Println("Several atoms were found. First one will be used")
 	} else {
-		fmt.Printf("Found atom : %s\n", atom[1])
+		fmt.Printf("Found atom : %s\n", atom[0])
 	}
-	return atom[1]
+	return atom[0]
 }
 
 func extractContent(src string) string {
