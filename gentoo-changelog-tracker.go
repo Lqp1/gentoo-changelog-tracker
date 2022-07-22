@@ -130,14 +130,13 @@ func formatDiff(commitID string) string {
 	return out
 }
 
-func fillCommit(queue chan struct {
+type info struct {
 	int
 	string
-}, index int, commit string) {
-	queue <- struct {
-		int
-		string
-	}{index, formatDiff(commit)}
+}
+
+func fillCommit(queue chan info, index int, commit string) {
+	queue <- info {index, formatDiff(commit)}
 }
 
 func main() {
@@ -172,10 +171,7 @@ func main() {
 				fmt.Println(formatEntry(feed.Items[i], i+1, *limit))
 			}
 		} else {
-			queue := make(chan struct {
-				int
-				string
-			})
+			queue := make(chan info)
 			output := make([]string, *limit)
 			for i := 0; i < *limit; i++ {
 				go fillCommit(queue, i, feed.Items[i].GUID)
