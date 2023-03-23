@@ -23,6 +23,12 @@ jobs:
 
     - name: Build
       run: go build -v ./...
-
-    - name: Test
-      run: go test -v ./...
+  gentoo-test:
+    runs-on: ubuntu-latest
+    container:
+      image: gentoo/stage3:systemd-20230320
+    steps:
+      - name: install EIX and Go
+        run: emerge --ask=n app-portage/eix dev-lang/go
+      - name: Test
+        run: go test -v ./...
