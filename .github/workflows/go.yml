@@ -27,8 +27,15 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: gentoo/stage3:systemd-20230320
+      env:
+        FEATURES: -ipc-sandbox -network-sandbox -pid-sandbox -sandbox -usersandbox
     steps:
+      - uses: actions/checkout@v3
+      - name: sync gentoo portage tree
+        run: emerge-webrsync
       - name: install EIX and Go
         run: emerge --ask=n app-portage/eix dev-lang/go
+      - name: initialize eix
+        run: eix-update
       - name: Test
         run: go test -v ./...

@@ -7,8 +7,8 @@ import (
 // TestHelloName calls greetings.Hello with a name, checking
 // for a valid return value.
 func TestHelloName(t *testing.T) {
-    query := "apps/portage"
-	expected := "sys-apps/portage"
+    query := "portage/eix"
+	expected := "app-portage/eix"
 	answer := lookupAtomEix(query)
 
 	if answer != expected {
