@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 _gentoo_changelog_tracker_complete() {
   export EIX_LIMIT=0
   local cur prev opts packages
@@ -19,7 +17,7 @@ _gentoo_changelog_tracker_complete() {
   packages=$(eix -#n -C "$cat" "${atom}" | awk '{print $1}' | sort)
 
   if [[ ${prev} == "gentoo-changelog-tracker" ]]; then
-    COMPREPLY=( $(compgen -A package -W "${packages}") )
+    COMPREPLY=( $(compgen -W "${packages}") )
   fi
   return 0
 }
