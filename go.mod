@@ -11,5 +11,5 @@ require (
 	github.com/mmcdole/gofeed v1.1.3
 	github.com/mmcdole/goxpp v1.0.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	golang.org/x/net v0.7.0
+	golang.org/x/net v0.17.0
 )
